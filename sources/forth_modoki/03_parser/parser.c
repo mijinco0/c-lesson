@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 enum LexicalType {
@@ -10,7 +11,7 @@ enum LexicalType {
     EXECUTABLE_NAME,
     LITERAL_NAME,
     OPEN_CURLY,
-    CLOSE_CURLY, 
+    CLOSE_CURLY,
     END_OF_FILE,
     UNKNOWN
 };
@@ -28,16 +29,67 @@ struct Token {
 
 #define NAME_SIZE 256
 
-int parse_one(int prev_ch, struct Token *out_token) {
-    /****
-     * 
-     * TODO: Implement here!
-     * 
-    ****/
-    out_token->ltype = UNKNOWN;
-    return EOF;
+enum LexicalType gettype(int c)
+{
+    return isdigit(c) ? NUMBER : SPACE;
 }
 
+int ctoi(int c)
+{
+    return isdigit(c) ? c - '0' : -1;
+}
+
+int parse_one(int prev_ch, struct Token *out_token) {
+    /****
+     *
+     * TODO: Implement here!
+     *
+    ****/
+
+    if (prev_ch == EOF) {
+        prev_ch = cl_getc();
+        if (prev_ch == EOF) {
+            out_token->ltype = END_OF_FILE;
+            return EOF;
+        }
+    }
+
+    int val = 0;
+    int c = prev_ch;
+    enum LexicalType prevt = gettype(prev_ch);
+
+    do {
+        if (gettype(c) != prevt) break;
+
+        switch (prevt) {
+        case NUMBER:
+            val = (val * 10) + ctoi(c);
+            break;
+        case SPACE:
+            val = ' ';
+            break;
+        default:
+            break;
+        }
+    } while ((c = cl_getc()) != EOF);
+
+    out_token->ltype = prevt;
+
+    switch (prevt) {
+    case NUMBER:
+        out_token->u.number = val;
+        break;
+    case SPACE:
+        out_token->u.onechar = ' ';
+        break;
+    default:
+        out_token->ltype = UNKNOWN;
+        c = EOF;
+        break;
+    }
+
+    return c;
+}
 
 void parser_print_all() {
     int ch = EOF;
@@ -120,7 +172,7 @@ static void unit_tests() {
 int main() {
     unit_tests();
 
-    cl_getc_set_src("123 45 add /some { 2 3 add } def");
-    parser_print_all();
+    //cl_getc_set_src("123 45 add /some { 2 3 add } def");
+    //parser_print_all();
     return 0;
 }
