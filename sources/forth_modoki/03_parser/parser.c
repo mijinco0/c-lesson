@@ -90,7 +90,31 @@ static int r_exename(int prev_ch, struct Token *out_token) {
 }
 
 static int r_litname(int prev_ch, struct Token *out_token) {
-    return 0;
+    char buf[NAME_SIZE];
+    char *p = buf;
+
+    /* check if 2nd char is alpha */
+    int c = cl_getc();
+    if (!isalpha(c)) {
+        out_token->ltype = UNKNOWN;
+        return EOF;
+    }
+
+    while (1) {
+        *p++ = (char)c;
+        c = cl_getc();
+        if (!is_namechar(c)) break;
+    }
+    *p = '\0';
+
+    int n = p - buf + 1;
+    p = (char *)malloc(n);
+    strncpy(p, buf, n);
+
+    out_token->ltype = LITERAL_NAME;
+    out_token->u.name = p;
+
+    return c;
 }
 
 static int r_opencurly(int prev_ch, struct Token *out_token) {
