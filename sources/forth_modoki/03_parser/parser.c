@@ -118,11 +118,17 @@ static int r_litname(int prev_ch, struct Token *out_token) {
 }
 
 static int r_opencurly(int prev_ch, struct Token *out_token) {
-    return 0;
+    out_token->ltype = OPEN_CURLY;
+    out_token->u.onechar = prev_ch;
+
+    return cl_getc();
 }
 
 static int r_closecurly(int prev_ch, struct Token *out_token) {
-    return 0;
+    out_token->ltype = CLOSE_CURLY;
+    out_token->u.onechar = prev_ch;
+
+    return cl_getc();
 }
 
 static int r_eof(int prev_ch, struct Token *out_token) {
