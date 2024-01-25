@@ -29,66 +29,96 @@ struct Token {
 
 #define NAME_SIZE 256
 
-enum LexicalType gettype(int c)
-{
-    return isdigit(c) ? NUMBER : SPACE;
-}
-
 int ctoi(int c)
 {
     return isdigit(c) ? c - '0' : -1;
 }
 
-int parse_one(int prev_ch, struct Token *out_token) {
-    /****
-     *
-     * TODO: Implement here!
-     *
-    ****/
+static int r_number(int prev_ch, struct Token *out_token) {
+    int c, n = ctoi(prev_ch);
 
-    if (prev_ch == EOF) {
-        prev_ch = cl_getc();
-        if (prev_ch == EOF) {
-            out_token->ltype = END_OF_FILE;
-            return EOF;
-        }
+    while (1) {
+        c = cl_getc();
+        if (!isdigit(c)) break;
+        n = (n * 10) + ctoi(c);
     }
 
-    int val = 0;
-    int c = prev_ch;
-    enum LexicalType prevt = gettype(prev_ch);
-
-    do {
-        if (gettype(c) != prevt) break;
-
-        switch (prevt) {
-        case NUMBER:
-            val = (val * 10) + ctoi(c);
-            break;
-        case SPACE:
-            val = ' ';
-            break;
-        default:
-            break;
-        }
-    } while ((c = cl_getc()) != EOF);
-
-    out_token->ltype = prevt;
-
-    switch (prevt) {
-    case NUMBER:
-        out_token->u.number = val;
-        break;
-    case SPACE:
-        out_token->u.onechar = ' ';
-        break;
-    default:
-        out_token->ltype = UNKNOWN;
-        c = EOF;
-        break;
-    }
+    out_token->ltype = NUMBER;
+    out_token->u.number = n;
 
     return c;
+}
+
+static int r_space(int prev_ch, struct Token *out_token) {
+    int c;
+
+    while (1) {
+        c = cl_getc();
+        if ((c != ' ') || (c == EOF)) break;
+    }
+
+    out_token->ltype = SPACE;
+    out_token->u.onechar = ' ';
+
+    return c;
+}
+
+static int r_exename(int prev_ch, struct Token *out_token) {
+    return 0;
+}
+
+static int r_litname(int prev_ch, struct Token *out_token) {
+    return 0;
+}
+
+static int r_opencurly(int prev_ch, struct Token *out_token) {
+    return 0;
+}
+
+static int r_closecurly(int prev_ch, struct Token *out_token) {
+    return 0;
+}
+
+static int r_eof(int prev_ch, struct Token *out_token) {
+    out_token->ltype = END_OF_FILE;
+    return EOF;
+}
+
+static int r_unknown(int prev_ch, struct Token *out_token) {
+    return 0;
+}
+
+typedef int (*reader_t)(int prev_ch, struct Token *out_token);
+static reader_t Reader[] = {
+    r_number,
+    r_space,
+    r_exename,
+    r_litname,
+    r_opencurly,
+    r_closecurly,
+    r_eof,
+    r_unknown,
+};
+
+enum LexicalType gettype(int head_ch)
+{
+    if (isdigit(head_ch)) return NUMBER;
+    if (head_ch == ' ') return SPACE;
+    if (isalpha(head_ch)) return EXECUTABLE_NAME;
+    if (head_ch == '/') return LITERAL_NAME;
+    if (head_ch == '{') return OPEN_CURLY;
+    if (head_ch == '}') return CLOSE_CURLY;
+    if (head_ch == EOF) return END_OF_FILE;
+    return UNKNOWN;
+}
+
+int parse_one(int prev_ch, struct Token *out_token) {
+    /* for the first call */
+    if (prev_ch == EOF) {
+        prev_ch = cl_getc();
+    }
+
+    return Reader[gettype(prev_ch)](prev_ch, out_token);
 }
 
 void parser_print_all() {
