@@ -34,6 +34,10 @@ int ctoi(int c)
     return isdigit(c) ? c - '0' : -1;
 }
 
+int is_namechar(int c) {
+    return (isalpha(c) || isdigit(c)) ? 1 : 0;
+}
+
 static int r_number(int prev_ch, struct Token *out_token) {
     int c, n = ctoi(prev_ch);
 
@@ -64,7 +68,25 @@ static int r_space(int prev_ch, struct Token *out_token) {
 }
 
 static int r_exename(int prev_ch, struct Token *out_token) {
-    return 0;
+    char buf[NAME_SIZE];
+    char *p = buf;
+    int c = prev_ch;
+
+    while (1) {
+        *p++ = (char)c;
+        c = cl_getc();
+        if (!is_namechar(c)) break;
+    }
+    *p = '\0';
+
+    int n = p - buf + 1;
+    p = (char *)malloc(n);
+    strncpy(p, buf, n);
+
+    out_token->ltype = EXECUTABLE_NAME;
+    out_token->u.name = p;
+
+    return c;
 }
 
 static int r_litname(int prev_ch, struct Token *out_token) {
