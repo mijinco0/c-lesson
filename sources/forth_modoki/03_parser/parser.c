@@ -137,7 +137,8 @@ static int r_eof(int prev_ch, struct Token *out_token) {
 }
 
 static int r_unknown(int prev_ch, struct Token *out_token) {
-    return 0;
+    out_token->ltype = UNKNOWN;
+    return EOF;
 }
 
 typedef int (*reader_t)(int prev_ch, struct Token *out_token);
