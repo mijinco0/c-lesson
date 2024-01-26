@@ -1,5 +1,5 @@
 #
-# how to build:
+# to build, run the following commands in project's top directory.
 # % mkdir build/
 # % cd build/
 # % cmake ..
