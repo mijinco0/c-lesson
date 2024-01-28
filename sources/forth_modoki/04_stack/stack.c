@@ -45,6 +45,16 @@ void *stack_pop(stack_t *stack)
     return (void *)"";    // to let test fail
 }
 
+int stack_is_empty(stack_t *stack)
+{
+    return stack->height <= 0;
+}
+
+int stack_is_full(stack_t *stack)
+{
+    return stack->height >= stack->size;
+}
+
 void stack_print_all(stack_t *stack)
 {
 }

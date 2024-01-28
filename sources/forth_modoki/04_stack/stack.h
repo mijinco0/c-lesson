@@ -10,6 +10,8 @@ stack_t *stack_new(size_t size);
 void stack_finalize(stack_t *stack);
 int stack_push(stack_t *stack, void *data);
 void *stack_pop(stack_t *stack);
+int stack_is_empty(stack_t *stack);
+int stack_is_full(stack_t *stack);
 void stack_print_all(stack_t *stack);
 
 #endif
