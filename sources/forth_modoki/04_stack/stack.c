@@ -42,6 +42,7 @@ int stack_push(stack_t *stack, void *data)
 
 void *stack_pop(stack_t *stack)
 {
+    if (stack_is_empty(stack)) return NULL;
     return (void *)"";    // to let test fail
 }
 
