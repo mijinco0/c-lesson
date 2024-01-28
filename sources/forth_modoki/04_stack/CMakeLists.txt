@@ -10,6 +10,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 set(PRJNAME stack)
 project(${PRJNAME} C)
 
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")   # run cmake with '-DCMAKE_BUILD_TYPE=Debug' to enable this
+
 file(GLOB SOURCES *.c)
 file(GLOB SOURCES_FOR_TEST test/*.c)
 
