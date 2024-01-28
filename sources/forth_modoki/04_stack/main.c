@@ -19,4 +19,5 @@ int main()
 static void unit_tests()
 {
     test_stack_pop_empty_should_return_NULL();
+    test_stack_push_and_pop_integer_1();
 }
