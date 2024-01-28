@@ -37,13 +37,18 @@ void stack_finalize(stack_t *stack)
 
 int stack_push(stack_t *stack, void *data)
 {
-    return 0;
+    if (!stack || !data) return -1;
+    if ((stack->height + 1) >= stack->size) return -2;
+
+    stack->array[stack->height++] = data;
+
+    return stack->height;
 }
 
 void *stack_pop(stack_t *stack)
 {
     if (stack_is_empty(stack)) return NULL;
-    return (void *)"";    // to let test fail
+    return stack->array[--stack->height];
 }
 
 int stack_is_empty(stack_t *stack)
