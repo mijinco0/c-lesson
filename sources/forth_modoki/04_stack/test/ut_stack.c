@@ -52,8 +52,7 @@ void test_stack_push_and_pop_integer_1()
         act_data = *(int *)popd->data;
     }
 
-    mydata_free(pushd);
-    mydata_free(popd);
+    mydata_free(pushd);    /* popd is also freed */
     stack_finalize(stack);
 
     assert(act_height == expect_height);
