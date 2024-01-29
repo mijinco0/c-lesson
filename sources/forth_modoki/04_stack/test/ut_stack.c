@@ -59,3 +59,56 @@ void test_stack_push_and_pop_integer_1()
     assert(act_type == expect_type);
     assert(act_data == expect_data);
 }
+
+void test_stack_push_and_pop_integer_2()
+{
+    int input[] = {123, 456};
+    int expect_height[] = {1, 2};
+    mydata_type_t expect_type = INTEGER;
+    int expect_data[] = {456, 123};
+    int expect_popcnt = 2;
+
+    int act_height[] = {0, 0};
+    mydata_type_t act_type[] = {UNKNOWN, UNKNOWN};
+    int act_data[] = {0, 0};
+    int act_popcnt = 0;
+
+    stack_t *stack = stack_new(STACK_SIZE);
+    if (!stack) {
+        fprintf(stderr, "error: cannot initialize stack.\n");
+        return;
+    }
+
+    mydata_t *d;
+    int i;
+
+    for (i = 0; i < 2; i++) {
+        d = mydata_init_integer(input[i]);
+        act_height[i] = stack_push(stack, (void *)d);
+    }
+
+    while (1) {
+        d = stack_pop(stack);
+        if (!d) break;
+
+        if (act_popcnt < 2) {
+            act_type[act_popcnt] = d->type;
+            act_data[act_popcnt] = *(int *)d->data;
+        }
+        act_popcnt++;
+
+        mydata_free(d);
+    }
+
+    stack_finalize(stack);
+
+    assert(act_height[0] == expect_height[0]);
+    assert(act_type[0] == expect_type);
+    assert(act_data[0] == expect_data[0]);
+
+    assert(act_height[1] == expect_height[1]);
+    assert(act_type[1] == expect_type);
+    assert(act_data[1] == expect_data[1]);
+
+    assert(act_popcnt == expect_popcnt);
+}
