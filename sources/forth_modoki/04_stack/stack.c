@@ -64,3 +64,22 @@ int stack_is_full(stack_t *stack)
 void stack_print_all(stack_t *stack)
 {
 }
+
+/* for debug */
+size_t stack_get_size(stack_t *stack)
+{
+    return stack->size;
+}
+
+/* for debug */
+size_t stack_get_height(stack_t *stack)
+{
+    return stack->height;
+}
+
+/* for debug */
+void *stack_get_elem(stack_t *stack, int i)
+{
+    if (i >= stack->height) return NULL;
+    return stack->array[i];
+}

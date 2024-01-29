@@ -14,4 +14,9 @@ int stack_is_empty(stack_t *stack);
 int stack_is_full(stack_t *stack);
 void stack_print_all(stack_t *stack);
 
+/* for debug */
+size_t stack_get_size(stack_t *stack);
+size_t stack_get_height(stack_t *stack);
+void *stack_get_elem(stack_t *stack, int i);
+
 #endif
