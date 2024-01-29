@@ -2,7 +2,7 @@
 #include "stack.h"
 #include "mydata.h"
 
-void print_stack_all(stack_t *stack)
+void print_stack(stack_t *stack)
 {
     int h = (int)stack_get_height(stack);
     mydata_t *d;

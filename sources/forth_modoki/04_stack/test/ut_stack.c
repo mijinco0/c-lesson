@@ -88,7 +88,7 @@ void test_stack_push_and_pop_integer_2()
         act_height[i] = stack_push(stack, (void *)d);
     }
 
-    //print_stack_all(stack);
+    //print_stack(stack);
 
     while (1) {
         d = stack_pop(stack);
@@ -103,7 +103,7 @@ void test_stack_push_and_pop_integer_2()
         mydata_free(d);
     }
 
-    //print_stack_all(stack);
+    //print_stack(stack);
 
     stack_finalize(stack);
 
