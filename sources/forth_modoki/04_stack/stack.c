@@ -61,10 +61,6 @@ int stack_is_full(stack_t *stack)
     return stack->height >= stack->size;
 }
 
-void stack_print_all(stack_t *stack)
-{
-}
-
 /* for debug */
 size_t stack_get_size(stack_t *stack)
 {
