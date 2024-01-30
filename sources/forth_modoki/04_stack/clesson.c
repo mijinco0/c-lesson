@@ -9,7 +9,7 @@ void print_stack(stack_t *stack)
     char buf[256];
     char *type;
 
-    printf("\nsize = %d, height = %d\n", (int)stack_get_size(stack), h);
+    printf("size = %d, height = %d\n", (int)stack_get_size(stack), h);
 
     while (--h >= 0) {
         d = (mydata_t *)stack_get_elem(stack, h);
