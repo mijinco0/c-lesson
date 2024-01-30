@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mydata.h"
@@ -53,4 +54,26 @@ void mydata_free(mydata_t *d)
         free(d->data);
     }
     free(d);
+}
+
+char *mydata_tostr(char *out, mydata_t *d, size_t n)
+{
+    if (!d) {
+        *out = '\0';
+        return out;
+    }
+
+    switch (d->type) {
+    case INTEGER:
+        snprintf(out, n, "%d", *(int *)d->data);
+        break;
+    case STRING:
+        snprintf(out, n, "%s", (char *)d->data);
+        break;
+    default:
+        *out = '\0';
+        break;
+    }
+
+    return out;
 }
