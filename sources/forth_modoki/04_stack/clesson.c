@@ -18,7 +18,7 @@ void print_stack(stack_t *stack)
         if (!d) {
             printf("NULL\n");
         } else if (d->type < UNKNOWN) {
-            type = (d->type == INTEGER) ? "INTEGER" : "STRING";
+            type = mydata_get_type(d);
             mydata_tostr(buf, d, 256 - 1);
             printf("type = %s, data = %s, addr(data) = 0x%lx\n", type, buf, (unsigned long)d->data);
         } else {

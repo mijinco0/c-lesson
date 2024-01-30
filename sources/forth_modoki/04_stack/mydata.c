@@ -77,3 +77,23 @@ char *mydata_tostr(char *out, mydata_t *d, size_t n)
 
     return out;
 }
+
+char *mydata_get_type(mydata_t *d)
+{
+    if (!d) return NULL;
+
+    char *t = "UNKNOWN";
+
+    switch (d->type) {
+    case INTEGER:
+        t = "INTEGER";
+        break;
+    case STRING:
+        t = "STRING";
+        break;
+    default:
+        break;
+    }
+
+    return t;
+}
