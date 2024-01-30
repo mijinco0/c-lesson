@@ -15,8 +15,8 @@ stack_t *stack_new(size_t size)
     stack_t *stack = (stack_t *)malloc(sizeof(stack_t));
     if (!stack) return NULL;
 
-    stack->height = 0;
     stack->size = size;
+    stack_clear(stack);
 
     stack->array = (void **)malloc(sizeof(void *) * size);
     if (!stack->array) {
@@ -59,6 +59,11 @@ int stack_is_empty(stack_t *stack)
 int stack_is_full(stack_t *stack)
 {
     return stack->height >= stack->size;
+}
+
+void stack_clear(stack_t *stack)
+{
+    stack->height = 0;
 }
 
 /* for debug */

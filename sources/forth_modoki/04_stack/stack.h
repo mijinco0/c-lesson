@@ -12,6 +12,7 @@ int stack_push(stack_t *stack, void *data);
 void *stack_pop(stack_t *stack);
 int stack_is_empty(stack_t *stack);
 int stack_is_full(stack_t *stack);
+void stack_clear(stack_t *stack);
 
 /* for debug */
 size_t stack_get_size(stack_t *stack);
