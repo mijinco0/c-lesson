@@ -1,17 +1,55 @@
+#include <string.h>
 #include <assert.h>
 #include "clesson.h"
+#include "parser.h"
 #include "stack.h"
 
 static stack_t *sStack;
 
-void eval() {}
+static int streq(char *s1, char *s2) {
+    return !strcmp(s1, s2);
+}
+
+void eval() {
+    if (!sStack) return;
+
+    int height, ch = EOF;
+    int buf[STACK_SIZE];
+    struct Token *token = parser_alloc_token();
+
+    stack_clear(sStack);
+
+    do {
+        ch = parse_one(ch, token);
+        if (token->ltype == UNKNOWN) continue;
+
+        switch (token->ltype) {
+            case NUMBER:
+                height = stack_get_height(sStack);
+                buf[height] = token->u.number;
+                stack_push(sStack, &buf[height]);
+                break;
+            case EXECUTABLE_NAME:
+                if (streq(token->u.name, "add")) {
+                    int a = *(int *)stack_pop(sStack) + *(int *)stack_pop(sStack);
+                    height = stack_get_height(sStack);
+                    buf[height] = a;
+                    stack_push(sStack, &buf[height]);
+                }
+                break;
+            default:
+                break;
+        }
+    } while (ch != EOF);
+
+    parser_free_token(token);
+}
 
 static void test_eval_num_one() {
     char *input = "123";
     int expect = 123;
 
     cl_getc_set_src(input);
-    stack_clear(sStack);
 
     eval();
 
@@ -33,7 +71,6 @@ static void test_eval_num_two() {
     int expect2 = 123;
 
     cl_getc_set_src(input);
-    stack_clear(sStack);
 
     eval();
 
@@ -63,7 +100,6 @@ static void test_eval_num_add() {
     int expect = 3;
 
     cl_getc_set_src(input);
-    stack_clear(sStack);
 
     eval();
 
@@ -85,6 +121,11 @@ int main() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
+
+    char *input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
+    cl_getc_set_src(input);
+    eval();
+    printf("result: %d\n", *(int *)stack_pop(sStack));
 
     stack_finalize(sStack);
 
