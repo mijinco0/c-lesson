@@ -30,12 +30,12 @@ static reader_t Reader[] = {
     r_unknown,
 };
 
-struct Token *parser_alloc_token()
+struct Token *parser_token_new()
 {
     struct Token *t = (struct Token *)malloc(sizeof(struct Token));
     if (!t) return NULL;
 
-    //printf("allc: %lx, parser_alloc_token, t\n", (unsigned long)t);
+    //printf("allc: %lx, parser_token_new, t\n", (unsigned long)t);
 
     t->ltype = UNKNOWN;
     t->u.name = NULL;
@@ -44,14 +44,14 @@ struct Token *parser_alloc_token()
     return t;
 }
 
-void parser_free_token(struct Token *t)
+void parser_token_delete(struct Token *t)
 {
     if (!t) return;
     if (t->_name_ptr) {
-        //printf("free: %lx, parser_free_token, t->_name_ptr\n", (unsigned long)t->_name_ptr);
+        //printf("free: %lx, parser_token_delete, t->_name_ptr\n", (unsigned long)t->_name_ptr);
         free(t->_name_ptr);
     }
-    //printf("free: %lx, parser_free_token, t\n", (unsigned long)t);
+    //printf("free: %lx, parser_token_delete, t\n", (unsigned long)t);
     free(t);
 }
 

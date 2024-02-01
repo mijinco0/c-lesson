@@ -15,7 +15,7 @@ void eval() {
 
     int height, ch = EOF;
     int buf[STACK_SIZE];
-    struct Token *token = parser_alloc_token();
+    struct Token *token = parser_token_new();
 
     stack_clear(sStack);
 
@@ -42,7 +42,7 @@ void eval() {
         }
     } while (ch != EOF);
 
-    parser_free_token(token);
+    parser_token_delete(token);
 }
 
 static void test_eval_num_one() {
@@ -127,7 +127,7 @@ int main() {
     eval();
     printf("result: %d\n", *(int *)stack_pop(sStack));
 
-    stack_finalize(sStack);
+    stack_delete(sStack);
 
     return 0;
 }
