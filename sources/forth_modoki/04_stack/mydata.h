@@ -13,10 +13,10 @@ typedef struct MyData {
     void *data;
 } mydata_t;
 
-mydata_t *mydata_init_integer(int i);
-mydata_t *mydata_init_string(char *s);
-mydata_t *mydata_alloc(void);
-void mydata_free(mydata_t *d);
+mydata_t *mydata_new_integer(int i);
+mydata_t *mydata_new_string(char *s);
+mydata_t *mydata_new(void);
+void mydata_delete(mydata_t *d);
 char *mydata_tostr(char *out, mydata_t *d, size_t n);
 char *mydata_get_type(mydata_t *d);
 

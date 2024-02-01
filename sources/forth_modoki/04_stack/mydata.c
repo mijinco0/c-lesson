@@ -3,9 +3,9 @@
 #include <string.h>
 #include "mydata.h"
 
-mydata_t *mydata_init_integer(int i)
+mydata_t *mydata_new_integer(int i)
 {
-    mydata_t *d = mydata_alloc();
+    mydata_t *d = mydata_new();
     if (!d) return NULL;
 
     d->type = INTEGER;
@@ -19,9 +19,9 @@ mydata_t *mydata_init_integer(int i)
     return d;
 }
 
-mydata_t *mydata_init_string(char *s)
+mydata_t *mydata_new_string(char *s)
 {
-    mydata_t *d = mydata_alloc();
+    mydata_t *d = mydata_new();
     if (!d) return NULL;
 
     size_t n = strlen(s) + 1;
@@ -36,7 +36,7 @@ mydata_t *mydata_init_string(char *s)
     return d;
 }
 
-mydata_t *mydata_alloc(void)
+mydata_t *mydata_new(void)
 {
     mydata_t *d = (mydata_t *)malloc(sizeof(mydata_t));
     if (!d) return NULL;
@@ -47,7 +47,7 @@ mydata_t *mydata_alloc(void)
     return d;
 }
 
-void mydata_free(mydata_t *d)
+void mydata_delete(mydata_t *d)
 {
     if (!d) return;
     if (d->data) {

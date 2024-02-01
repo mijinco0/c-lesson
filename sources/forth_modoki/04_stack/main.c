@@ -43,16 +43,16 @@ static void stack_print_all()
     printf("\n");
 
     mydata_t *pushd[NDATA];
-    pushd[0] = mydata_init_string("abc");
-    pushd[1] = mydata_init_string("def");
-    pushd[2] = mydata_init_string("ghi");
-    pushd[3] = mydata_init_integer(12);
-    pushd[4] = mydata_init_string("jkl");
-    pushd[5] = mydata_init_integer(34);
-    pushd[6] = mydata_init_integer(56);
-    pushd[7] = mydata_init_integer(78);
-    pushd[8] = mydata_init_string("mno");
-    pushd[9] = mydata_init_integer(9);
+    pushd[0] = mydata_new_string("abc");
+    pushd[1] = mydata_new_string("def");
+    pushd[2] = mydata_new_string("ghi");
+    pushd[3] = mydata_new_integer(12);
+    pushd[4] = mydata_new_string("jkl");
+    pushd[5] = mydata_new_integer(34);
+    pushd[6] = mydata_new_integer(56);
+    pushd[7] = mydata_new_integer(78);
+    pushd[8] = mydata_new_string("mno");
+    pushd[9] = mydata_new_integer(9);
 
     for (int i = 0; i < NDATA; i++) {
         stack_push(stack, (void *)pushd[i]);
@@ -74,7 +74,7 @@ static void stack_print_all()
         mydata_tostr(buf, popd, 256 - 1);
         printf("pop: %s, %s\n", type, buf);
 
-        mydata_free(popd);    /* each pushd(s) are also freed */
+        mydata_delete(popd);    /* each pushd(s) are also freed */
     }
     printf("\n");
 
@@ -82,5 +82,5 @@ static void stack_print_all()
     print_stack(stack);
     printf("\n");
 
-    stack_finalize(stack);
+    stack_delete(stack);
 }

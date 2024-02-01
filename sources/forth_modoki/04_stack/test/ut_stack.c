@@ -25,7 +25,7 @@ void test_stack_pop_empty_should_return_NULL()
 
     act = stack_pop(stack);
 
-    stack_finalize(stack);
+    stack_delete(stack);
 
     assert(act == expect);
 }
@@ -47,7 +47,7 @@ void test_stack_push_and_pop_integer_1()
         return;
     }
 
-    mydata_t *pushd = mydata_init_integer(input);
+    mydata_t *pushd = mydata_new_integer(input);
     act_height = stack_push(stack, (void *)pushd);
 
     mydata_t *popd = stack_pop(stack);
@@ -56,8 +56,8 @@ void test_stack_push_and_pop_integer_1()
         act_data = *(int *)popd->data;
     }
 
-    mydata_free(pushd);    /* popd is also freed */
-    stack_finalize(stack);
+    mydata_delete(pushd);    /* popd is also freed */
+    stack_delete(stack);
 
     assert(act_height == expect_height);
     assert(act_type == expect_type);
@@ -87,7 +87,7 @@ void test_stack_push_and_pop_integer_2()
     int i;
 
     for (i = 0; i < 2; i++) {
-        d = mydata_init_integer(input[i]);
+        d = mydata_new_integer(input[i]);
         act_height[i] = stack_push(stack, (void *)d);
     }
 
@@ -103,12 +103,12 @@ void test_stack_push_and_pop_integer_2()
         }
         act_popcnt++;
 
-        mydata_free(d);
+        mydata_delete(d);
     }
 
     //print_stack(stack);
 
-    stack_finalize(stack);
+    stack_delete(stack);
 
     assert(act_height[0] == expect_height[0]);
     assert(act_type[0] == expect_type);
@@ -138,7 +138,7 @@ void test_stack_push_and_pop_string_1()
         return;
     }
 
-    mydata_t *pushd = mydata_init_string(input);
+    mydata_t *pushd = mydata_new_string(input);
     act_height = stack_push(stack, (void *)pushd);
 
     mydata_t *popd = stack_pop(stack);
@@ -148,8 +148,8 @@ void test_stack_push_and_pop_string_1()
         act_data[MAX_STRLEN] = '\0';
     }
 
-    mydata_free(pushd);    /* popd is also freed */
-    stack_finalize(stack);
+    mydata_delete(pushd);    /* popd is also freed */
+    stack_delete(stack);
 
     assert(act_height == expect_height);
     assert(act_type == expect_type);
@@ -179,7 +179,7 @@ void test_stack_push_and_pop_string_2()
     int i;
 
     for (i = 0; i < 2; i++) {
-        d = mydata_init_string(input[i]);
+        d = mydata_new_string(input[i]);
         act_height[i] = stack_push(stack, (void *)d);
     }
 
@@ -196,12 +196,12 @@ void test_stack_push_and_pop_string_2()
         }
         act_popcnt++;
 
-        mydata_free(d);
+        mydata_delete(d);
     }
 
     //print_stack(stack);
 
-    stack_finalize(stack);
+    stack_delete(stack);
 
     assert(act_height[0] == expect_height[0]);
     assert(act_type[0] == expect_type);
