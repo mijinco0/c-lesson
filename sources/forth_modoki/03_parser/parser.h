@@ -24,8 +24,8 @@ struct Token {
 
 #define NAME_SIZE 256
 
-struct Token *parser_alloc_token();
-void parser_free_token(struct Token *t);
+struct Token *parser_token_new();
+void parser_token_delete(struct Token *t);
 int parse_one(int prev_ch, struct Token *out_token);
 
 #endif

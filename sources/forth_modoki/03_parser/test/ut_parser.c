@@ -15,14 +15,14 @@ void test_parse_one_number() {
 
     int act_ch, act_ltype, act_number;
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
     act_ltype = t->ltype;
     act_number = t->u.number;
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_ltype);
@@ -42,7 +42,7 @@ void test_parse_one_number2() {
     struct Token act_token[3];
     int ch = EOF;
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
 
@@ -52,7 +52,7 @@ void test_parse_one_number2() {
         act_token[i] = *t;
     }
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch[0] == expect_ch[0]);
     assert(act_token[0].ltype == expect_token[0].ltype);
@@ -75,13 +75,13 @@ void test_parse_one_empty_should_return_END_OF_FILE() {
     int act_ch;
     enum LexicalType act_ltype;
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
     act_ltype = t->ltype;
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_ltype);
@@ -97,7 +97,7 @@ void test_parse_one_executable_name() {
     enum LexicalType act_ltype;
     char act_name[NAME_SIZE];
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
@@ -108,7 +108,7 @@ void test_parse_one_executable_name() {
         *act_name = (char)'\0';
     }
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_type);
@@ -125,7 +125,7 @@ void test_parse_one_literal_name() {
     enum LexicalType act_ltype;
     char act_name[NAME_SIZE];
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
@@ -136,7 +136,7 @@ void test_parse_one_literal_name() {
         *act_name = (char)'\0';
     }
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_type);
@@ -153,14 +153,14 @@ void test_parse_one_open_curly() {
     int act_ltype;
     char act_onechar;
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
     act_ltype = t->ltype;
     act_onechar = t->u.onechar;
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_ltype);
@@ -177,14 +177,14 @@ void test_parse_one_close_curly() {
     int act_ltype;
     char act_onechar;
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
     act_ltype = t->ltype;
     act_onechar = t->u.onechar;
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_ltype);
@@ -199,13 +199,13 @@ void test_parse_one_unknown() {
     int act_ch;
     int act_ltype;
 
-    struct Token *t = parser_alloc_token();
+    struct Token *t = parser_token_new();
 
     cl_getc_set_src(input);
     act_ch = parse_one(EOF, t);
     act_ltype = t->ltype;
 
-    parser_free_token(t);
+    parser_token_delete(t);
 
     assert(act_ch == expect_ch);
     assert(act_ltype == expect_ltype);

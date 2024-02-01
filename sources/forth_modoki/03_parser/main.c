@@ -20,7 +20,7 @@ int main() {
 
 static void parser_print_all() {
     int ch = EOF;
-    struct Token *token = parser_alloc_token();
+    struct Token *token = parser_token_new();
 
     do {
         ch = parse_one(ch, token);
@@ -52,7 +52,7 @@ static void parser_print_all() {
         }
     }while(ch != EOF);
 
-    parser_free_token(token);
+    parser_token_delete(token);
 }
 
 static void unit_tests() {
