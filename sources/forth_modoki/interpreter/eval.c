@@ -123,6 +123,56 @@ static void test_eval_num_add() {
     assert(expect == actual);
 }
 
+static void test_eval_literal_one() {
+    char *input = "/hoge";
+    char *expect = "hoge";
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    /* TODO: write code to pop stack top element */
+    char actual[NAME_SIZE + 1]; *actual = '\0';
+
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        strncpy(actual, (char *)e->data, NAME_SIZE);
+        stkelm_delete(e);
+    }
+
+    assert(streq(expect, actual));
+}
+
+static void test_eval_literal_two() {
+    char *input = "/hoge /fuga";
+    char *expect1 = "fuga";
+    char *expect2 = "hoge";
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    /* TODO: write code to pop stack top and second top element */
+    char actual1[NAME_SIZE + 1]; *actual1 = '\0';
+    char actual2[NAME_SIZE + 1]; *actual2 = '\0';
+
+    stkelm_t *e;
+
+    e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        strncpy(actual1, (char *)e->data, NAME_SIZE);
+        stkelm_delete(e);
+    }
+
+    e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        strncpy(actual2, (char *)e->data, NAME_SIZE);
+        stkelm_delete(e);
+    }
+
+    assert(streq(expect1, actual1));
+    assert(streq(expect2, actual2));
+}
 
 int main() {
     sStack = stack_new(STACK_SIZE);
@@ -130,6 +180,8 @@ int main() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
+    test_eval_literal_one();
+    test_eval_literal_two();
 
     char *input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
     cl_getc_set_src(input);
