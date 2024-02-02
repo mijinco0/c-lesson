@@ -3,6 +3,7 @@
 #include "clesson.h"
 #include "parser.h"
 #include "stack.h"
+#include "stkelm.h"
 
 static stack_t *sStack;
 
@@ -13,8 +14,8 @@ static int streq(char *s1, char *s2) {
 void eval() {
     if (!sStack) return;
 
-    int height, ch = EOF;
-    int buf[STACK_SIZE];
+    int i, ch = EOF;
+    stkelm_t *e1, *e2;
     struct Token *token = parser_token_new();
 
     stack_clear(sStack);
@@ -25,16 +26,20 @@ void eval() {
 
         switch (token->ltype) {
             case NUMBER:
-                height = stack_get_height(sStack);
-                buf[height] = token->u.number;
-                stack_push(sStack, &buf[height]);
+                e1 = stkelm_new_integer(token->u.number);
+                stack_push(sStack, e1);
                 break;
             case EXECUTABLE_NAME:
                 if (streq(token->u.name, "add")) {
-                    int a = *(int *)stack_pop(sStack) + *(int *)stack_pop(sStack);
-                    height = stack_get_height(sStack);
-                    buf[height] = a;
-                    stack_push(sStack, &buf[height]);
+                    e1 = (stkelm_t *)stack_pop(sStack);
+                    e2 = (stkelm_t *)stack_pop(sStack);
+                    if (e1 && e2) {
+                        i = *(int *)e1->data + *(int *)e2->data;
+                        stkelm_delete(e1);
+                        stkelm_delete(e2);
+                        e1 = stkelm_new_integer(i);
+                        stack_push(sStack, e1);
+                    }
                 }
                 break;
             default:
@@ -56,9 +61,10 @@ static void test_eval_num_one() {
     /* TODO: write code to pop stack top element */
     int actual = 0;
 
-    int *d = (int *)stack_pop(sStack);
-    if (d) {
-        actual = *d;
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual = *(int *)e->data;
+        stkelm_delete(e);
     }
 
     assert(expect == actual);
@@ -78,16 +84,18 @@ static void test_eval_num_two() {
     int actual1 = 0;
     int actual2 = 0;
 
-    int *d;
+    stkelm_t *e;
 
-    d = (int *)stack_pop(sStack);
-    if (d) {
-        actual1 = *d;
+    e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual1 = *(int *)e->data;
+        stkelm_delete(e);
     }
 
-    d = (int *)stack_pop(sStack);
-    if (d) {
-        actual2 = *d;
+    e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual2 = *(int *)e->data;
+        stkelm_delete(e);
     }
 
     assert(expect1 == actual1);
@@ -106,9 +114,10 @@ static void test_eval_num_add() {
     /* TODO: write code to pop stack top element */
     int actual = 0;
 
-    int *d = (int *)stack_pop(sStack);
-    if (d) {
-        actual = *d;
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual = *(int *)e->data;
+        stkelm_delete(e);
     }
 
     assert(expect == actual);
@@ -125,7 +134,8 @@ int main() {
     char *input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
     cl_getc_set_src(input);
     eval();
-    printf("result: %d\n", *(int *)stack_pop(sStack));
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    printf("result: %d\n", *(int *)e->data);
 
     stack_delete(sStack);
 
