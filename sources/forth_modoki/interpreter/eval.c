@@ -29,6 +29,10 @@ void eval() {
                 e1 = stkelm_new_integer(token->u.number);
                 stack_push(sStack, e1);
                 break;
+            case LITERAL_NAME:
+                e1 = stkelm_new_string(token->u.name);
+                stack_push(sStack, e1);
+                break;
             case EXECUTABLE_NAME:
                 if (streq(token->u.name, "add")) {
                     e1 = (stkelm_t *)stack_pop(sStack);
