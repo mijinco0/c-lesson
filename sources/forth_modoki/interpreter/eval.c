@@ -201,6 +201,8 @@ int main() {
     test_dict_elem_one();
     test_dict_elem_two();
     test_dict_not_found();
+    test_dict_same_hash();
+    test_dict_overwrite();
 
     sStack = stack_new(STACK_SIZE);
 

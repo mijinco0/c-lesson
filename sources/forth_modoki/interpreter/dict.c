@@ -217,3 +217,97 @@ void test_dict_not_found()
 
     assert(expect == actual);
 }
+
+/* for hash table version */
+void test_dict_same_hash()
+{
+    int input[] = {123, 456, 789, 1011};
+    int expect[] = {123, 456, 789, 1011};
+    char *key[] = {"abc", "abyz", "cdwx", "efuv"};    /* last three keys has same hash */
+    int i;
+
+    dict_new();
+    dict_print_all();
+
+    stkelm_t *e = stkelm_new_integer(0);
+    for (i = 0; i < 4; i++) {
+        e = stkelm_set_integer(e, input[i]);
+        dict_put(key[i], e);
+    }
+    stkelm_delete(e);
+
+    dict_print_all();
+
+    int actual[] = {0, 0, 0, 0};
+
+    /* put elements in random order */
+    if (dict_get(key[2], e)) {
+        actual[2] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+    if (dict_get(key[0], e)) {
+        actual[0] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+    if (dict_get(key[3], e)) {
+        actual[3] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+    if (dict_get(key[1], e)) {
+        actual[1] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+
+    dict_delete();
+
+    assert(expect[0] == actual[0]);
+    assert(expect[1] == actual[1]);
+    assert(expect[2] == actual[2]);
+    assert(expect[3] == actual[3]);
+}
+
+void test_dict_overwrite()
+{
+    int input[] = {123, 456, 789, 1011, 1213};
+    int expect[] = {123, 456, 1213, 1011};
+    char *key[] = {"abc", "abyz", "cdwx", "efuv", "cdwx"};    /* value of "cdwx" should be overwritten */
+    int i;
+
+    dict_new();
+
+    stkelm_t *e = stkelm_new_integer(0);
+    for (i = 0; i < 5; i++) {
+        e = stkelm_set_integer(e, input[i]);
+        dict_put(key[i], e);
+    }
+    stkelm_delete(e);
+
+    dict_print_all();
+
+    int actual[] = {0, 0, 0, 0};
+
+    /* put elements in random order */
+    if (dict_get(key[2], e)) {
+        actual[2] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+    if (dict_get(key[0], e)) {
+        actual[0] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+    if (dict_get(key[3], e)) {
+        actual[3] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+    if (dict_get(key[1], e)) {
+        actual[1] = *(int *)e->data;
+        stkelm_delete(e);
+    }
+
+    dict_delete();
+
+    assert(expect[0] == actual[0]);
+    assert(expect[1] == actual[1]);
+    assert(expect[2] == actual[2]);
+    assert(expect[3] == actual[3]);
+}

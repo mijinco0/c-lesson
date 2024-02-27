@@ -16,5 +16,7 @@ void test_dict_is_empty();
 void test_dict_elem_one();
 void test_dict_elem_two();
 void test_dict_not_found();
+void test_dict_same_hash();
+void test_dict_overwrite();
 
 #endif
