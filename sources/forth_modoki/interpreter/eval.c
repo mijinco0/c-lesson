@@ -26,6 +26,7 @@ void eval() {
         if (token->ltype == UNKNOWN) continue;
 
         switch (token->ltype) {
+            char *name;
             case NUMBER:
                 e1 = stkelm_new_integer(token->u.number);
                 stack_push(sStack, e1);
@@ -35,7 +36,8 @@ void eval() {
                 stack_push(sStack, e1);
                 break;
             case EXECUTABLE_NAME:
-                if (streq(token->u.name, "add")) {
+                name = token->u.name;
+                if (streq(name, "add")) {
                     e1 = (stkelm_t *)stack_pop(sStack);
                     e2 = (stkelm_t *)stack_pop(sStack);
                     if (e1 && e2) {
@@ -45,6 +47,21 @@ void eval() {
                         e1 = stkelm_new_integer(i);
                         stack_push(sStack, e1);
                     }
+                } else if (streq(name, "def")) {
+                    e1 = (stkelm_t *)stack_pop(sStack);
+                    e2 = (stkelm_t *)stack_pop(sStack);
+                    if (e1 && e2) {
+                        dict_put((char *)e2->data, e1);
+                        stkelm_delete(e1);
+                        stkelm_delete(e2);
+                    }
+                } else if (dict_contains(name) >= 0) {
+                    if (dict_get(name, e1)) {
+                        stack_push(sStack, e1);
+                        stkelm_delete(e1);
+                    }
+                } else {
+                    /* do nothing */
                 }
                 break;
             default:
@@ -191,11 +208,19 @@ int main() {
     test_eval_literal_one();
     test_eval_literal_two();
 
+#if 0
     char *input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
     cl_getc_set_src(input);
     eval();
     stkelm_t *e = (stkelm_t *)stack_pop(sStack);
     printf("result: %d\n", *(int *)e->data);
+#elif 1
+    char *input = "/abc 12 def abc abc add";    /* =24 */
+    cl_getc_set_src(input);
+    eval();
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    printf("result: %d\n", *(int *)e->data);
+#endif
 
     stack_delete(sStack);
 
