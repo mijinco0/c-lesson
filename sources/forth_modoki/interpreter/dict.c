@@ -92,7 +92,7 @@ static struct KeyValue KeyValue_make(char *key, stkelm_t *elem)
 
     kv.key = (char *)malloc(strlen(key) + 1);
     if (kv.key) {
-        strncpy(kv.key, key, strlen(key));
+        strncpy(kv.key, key, strlen(key) + 1);
     }
 
     kv.value = stkelm_duplicate(elem);
