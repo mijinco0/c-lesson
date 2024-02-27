@@ -52,7 +52,7 @@ int dict_get(char *key, stkelm_t *out_elem)
 {
     int i = dict_contains(key);
     if (i >= 0) {
-        *out_elem = *(dict_array[i].value);
+        out_elem = stkelm_duplicate(dict_array[i].value);
         return 1;
     }
 
@@ -133,6 +133,7 @@ void test_dict_elem_one()
     int actual = 0;
     if (dict_get(key, e)) {
         actual = *(int *)e->data;
+        stkelm_delete(e);
     }
 
     dict_delete();
@@ -165,6 +166,7 @@ void test_dict_elem_two()
     for (int i = 0; i < 2; i++) {
         if (dict_get(key[i], e)) {
             actual[i] = *(int *)e->data;
+            stkelm_delete(e);
         }
     }
 
