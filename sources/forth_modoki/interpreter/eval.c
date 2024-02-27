@@ -197,8 +197,10 @@ static void test_eval_literal_two() {
 }
 
 int main() {
+    test_dict_is_empty();
     test_dict_elem_one();
     test_dict_elem_two();
+    test_dict_not_found();
 
     sStack = stack_new(STACK_SIZE);
 

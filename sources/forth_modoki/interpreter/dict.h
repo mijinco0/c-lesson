@@ -12,7 +12,9 @@ int dict_contains(char *key);
 void dict_print_all();
 
 /* for unit test */
+void test_dict_is_empty();
 void test_dict_elem_one();
 void test_dict_elem_two();
+void test_dict_not_found();
 
 #endif

@@ -114,6 +114,23 @@ static void KeyValue_release(struct KeyValue *kv)
 }
 
 /* for unit test */
+void test_dict_is_empty()
+{
+    int input = 123;
+    int expect = 0;
+    char *key = "hoge";
+
+    dict_new();
+    dict_print_all();
+
+    stkelm_t *e;
+    int actual = dict_get(key, e);
+
+    dict_delete();
+
+    assert(expect == actual);
+}
+
 void test_dict_elem_one()
 {
     int input = 123;
@@ -174,4 +191,29 @@ void test_dict_elem_two()
 
     assert(expect[0] == actual[0]);
     assert(expect[1] == actual[1]);
+}
+
+void test_dict_not_found()
+{
+    int input[] = {123, 456, 789};
+    int expect = 0;
+    char *key[] = {"hoge", "fuga", "piyo"};
+    char *trykey = "foo";
+
+    dict_new();
+
+    stkelm_t *e = stkelm_new_integer(0);
+    for (int i = 0; i < 3; i++) {
+        e = stkelm_set_integer(e, input[i]);
+        dict_put(key[i], e);
+    }
+    stkelm_delete(e);
+
+    dict_print_all();
+
+    int actual = dict_get(trykey, e);
+
+    dict_delete();
+
+    assert(expect == actual);
 }
