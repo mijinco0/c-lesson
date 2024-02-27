@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "stack.h"
 #include "stkelm.h"
+#include "dict.h"
 
 static stack_t *sStack;
 
@@ -179,6 +180,9 @@ static void test_eval_literal_two() {
 }
 
 int main() {
+    test_dict_elem_one();
+    test_dict_elem_two();
+
     sStack = stack_new(STACK_SIZE);
 
     test_eval_num_one();
