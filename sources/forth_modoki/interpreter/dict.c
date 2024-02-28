@@ -4,16 +4,22 @@
 #include <assert.h>
 #include "dict.h"
 
-struct KeyValue {
+#define TABLE_SIZE 16    /* must be a multiple of 2 */
+
+struct Node {
     char *key;
     stkelm_t *value;
+    struct Node *next;
 };
 
-static int dict_pos = 0;
-static struct KeyValue dict_array[1024];
+static struct Node *dict_array[TABLE_SIZE];
 
-static struct KeyValue KeyValue_make(char *key, stkelm_t *elem);
-static void KeyValue_release(struct KeyValue *kv);
+static int hash(char *str);
+static void delete_list(struct Node *p);
+static struct Node *update_or_insert_list(struct Node *p, char *key, stkelm_t *elem);
+static struct Node *search_list(struct Node *p, char *key);
+static struct Node *Node_new(char *key, stkelm_t *elem);
+static struct Node *Node_delete(struct Node *node);
 
 static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
@@ -21,7 +27,9 @@ static int streq(char *s1, char *s2) {
 
 void dict_new()
 {
-    dict_pos = 0;
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        dict_array[i] = NULL;
+    }
 }
 
 void dict_delete()
@@ -31,28 +39,31 @@ void dict_delete()
 
 void dict_clear()
 {
-    while (--dict_pos >= 0) {
-        KeyValue_release(&dict_array[dict_pos]);
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        delete_list(dict_array[i]);
+        dict_array[i] = NULL;
     }
-    dict_pos = 0;
 }
 
 void dict_put(char *key, stkelm_t *elem)
 {
-    int i = dict_contains(key);
-    if (i >= 0) {
-        stkelm_delete(dict_array[i].value);
-        dict_array[i].value = stkelm_duplicate(elem);
-    } else {
-        dict_array[dict_pos++] = KeyValue_make(key, elem);
+    int i = hash(key);
+    struct Node *head = dict_array[i];
+
+    if (head == NULL) {
+        head = Node_new(key, elem);
+        dict_array[i] = head;
+        return;
     }
+
+    update_or_insert_list(head, key, elem);
 }
 
 int dict_get(char *key, stkelm_t *out_elem)
 {
-    int i = dict_contains(key);
-    if (i >= 0) {
-        out_elem = stkelm_duplicate(dict_array[i].value);
+    struct Node *p = search_list(dict_array[hash(key)], key);
+    if (p) {
+        out_elem = stkelm_duplicate(p->value);
         return 1;
     }
 
@@ -61,56 +72,135 @@ int dict_get(char *key, stkelm_t *out_elem)
 
 int dict_contains(char *key)
 {
-    int i;
-    for (i = 0; i < dict_pos; i++) {
-        if (streq(key, dict_array[i].key)) {
-            return i;
-        }
-    }
-
-    return -1;
+    int h = hash(key);
+    return search_list(dict_array[h], key) ? h : -1;
 }
 
 void dict_print_all()
 {
-    stkelm_t *e;
+    struct Node *p;
     char s[32];
     int i;
 
-    for (i = 0; i < dict_pos; i++) {
-        e = dict_array[i].value;
-        if (!e) continue;
-
-        printf("[%.4d] %s %s", i, dict_array[i].key, stkelm_tostr(s, e, 32));
+    for (i = 0; i < TABLE_SIZE; i++) {
+        printf("[%.2d]: ", i);
+        p = dict_array[i];
+        while (p) {
+            printf("(%s, %s) ", p->key, stkelm_tostr(s, p->value, 32));
+            p = p->next;
+        }
         printf("\n");
     }
+    printf("\n");
 }
 
-static struct KeyValue KeyValue_make(char *key, stkelm_t *elem)
+static int hash(char *str)
 {
-    struct KeyValue kv = {NULL, NULL};
-
-    kv.key = (char *)malloc(strlen(key) + 1);
-    if (kv.key) {
-        strncpy(kv.key, key, strlen(key) + 1);
-    }
-
-    kv.value = stkelm_duplicate(elem);
-
-    return kv;
+    unsigned int val = 0;
+    while (*str) val += *str++;
+    return (int)(val & (TABLE_SIZE - 1));
 }
 
-static void KeyValue_release(struct KeyValue *kv)
+/*
+ * delete nodes subsequently connected to p
+ */
+static void delete_list(struct Node *p)
 {
-    if (kv->key) {
-        free(kv->key);
-        kv->key = NULL;
+    if (p == NULL) return;
+
+    struct Node *q;
+
+    while (1) {
+        q = p->next;
+        if (q == NULL) {
+            Node_delete(p);
+            break;
+        }
+        p->next = Node_delete(q);
+    }
+}
+
+/*
+ * return pointer to the node updated or inserted
+ */
+static struct Node *update_or_insert_list(struct Node *p, char *key, stkelm_t *elem)
+{
+    if (p == NULL) return NULL;
+
+    while (1) {
+        if (streq(p->key, key)) {
+            stkelm_delete(p->value);
+            p->value = stkelm_duplicate(elem);
+            return p;
+        }
+        if (p->next == NULL) break;
+        p = p->next;
     }
 
-    if (kv->value) {
-        stkelm_delete(kv->value);
-        kv->value = NULL;
+    p->next = Node_new(key, elem);
+
+    return p->next;
+}
+
+static struct Node *search_list(struct Node *p, char *key)
+{
+    if (p == NULL) return NULL;
+
+    while (1) {
+        if (streq(p->key, key)) {
+            return p;
+        }
+        if (p->next == NULL) break;
+        p = p->next;
     }
+
+    return NULL;
+}
+
+static struct Node *Node_new(char *key, stkelm_t *elem)
+{
+    struct Node *node = (struct Node *)malloc(sizeof(struct Node));
+    if (!node) return NULL;
+
+    node->key = (char *)malloc(strlen(key) + 1);
+    if (!node->key) {
+        free(node);
+        return NULL;
+    }
+    strncpy(node->key, key, strlen(key) + 1);
+
+    node->value = stkelm_duplicate(elem);
+    if (!node->value) {
+        free(node->key);
+        free(node);
+        return NULL;
+    }
+
+    node->next = NULL;
+
+    return node;
+}
+
+/*
+ * free node->key, node->value and node itself. then return node->next
+ */
+static struct Node *Node_delete(struct Node *node)
+{
+    if (!node) return NULL;
+
+    struct Node *next = node->next;
+
+    if (node->key) {
+        free(node->key);
+    }
+
+    if (node->value) {
+        stkelm_delete(node->value);
+    }
+
+    free(node);
+
+    return next;
 }
 
 /* for unit test */
