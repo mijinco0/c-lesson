@@ -223,7 +223,7 @@ void test_dict_same_hash()
 {
     int input[] = {123, 456, 789, 1011};
     int expect[] = {123, 456, 789, 1011};
-    char *key[] = {"abc", "abyz", "cdwx", "efuv"};    /* last three keys has same hash */
+    char *key[] = {"abcde", "abyz", "cdwx", "efuv"};    /* last three keys has same hash */
     int i;
 
     dict_new();
@@ -270,7 +270,7 @@ void test_dict_overwrite()
 {
     int input[] = {123, 456, 789, 1011, 1213};
     int expect[] = {123, 456, 1213, 1011};
-    char *key[] = {"abc", "abyz", "cdwx", "efuv", "cdwx"};    /* value of "cdwx" should be overwritten */
+    char *key[] = {"ab", "abyz", "cdwx", "efuv", "cdwx"};    /* value of "cdwx" should be overwritten */
     int i;
 
     dict_new();
