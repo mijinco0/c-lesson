@@ -5,78 +5,78 @@
 
 stkelm_t *stkelm_new_integer(int i)
 {
-    stkelm_t *d = stkelm_new();
-    if (!d) return NULL;
+    stkelm_t *e = stkelm_new();
+    if (!e) return NULL;
 
-    d->data = (void *)malloc(sizeof(int));
-    if (!d->data) {
-        free(d);
+    e->data = (void *)malloc(sizeof(int));
+    if (!e->data) {
+        free(e);
         return NULL;
     }
 
-    return stkelm_set_integer(d, i);
+    return stkelm_set_integer(e, i);
 }
 
-stkelm_t *stkelm_set_integer(stkelm_t *d, int i)
+stkelm_t *stkelm_set_integer(stkelm_t *e, int i)
 {
-    if (!d) return NULL;
-    if (!d->data) return NULL;
+    if (!e) return NULL;
+    if (!e->data) return NULL;
 
-    d->type = SE_INTEGER;
-    *(int *)d->data = i;
+    e->type = SE_INTEGER;
+    *(int *)e->data = i;
 
-    return d;
+    return e;
 }
 
 stkelm_t *stkelm_new_string(char *s)
 {
-    stkelm_t *d = stkelm_new();
-    if (!d) return NULL;
+    stkelm_t *e = stkelm_new();
+    if (!e) return NULL;
 
-    d->data = NULL;
-    d = stkelm_set_string(d, s);
-    if (!d->data) {
-        free(d);
+    e->data = NULL;
+    e = stkelm_set_string(e, s);
+    if (!e->data) {
+        free(e);
         return NULL;
     }
 
-    return d;
+    return e;
 }
 
-stkelm_t *stkelm_set_string(stkelm_t *d, char *s)
+stkelm_t *stkelm_set_string(stkelm_t *e, char *s)
 {
-    if (!d) return NULL;
+    if (!e) return NULL;
 
-    d->type = SE_STRING;
+    e->type = SE_STRING;
 
     size_t n = strlen(s) + 1;
-    if ((!d->data) || (n > (strlen((char *)d->data) + 1))) {
-        d->data = (void *)realloc(d->data, sizeof(char) * n);
+    if ((!e->data) || (n > (strlen((char *)e->data) + 1))) {
+        e->data = (void *)realloc(e->data, sizeof(char) * n);
     }
 
-    strncpy((char *)d->data, s, n);
+    strncpy((char *)e->data, s, n);
 
-    return d;
+    return e;
 }
 
 stkelm_t *stkelm_new(void)
 {
-    stkelm_t *d = (stkelm_t *)malloc(sizeof(stkelm_t));
-    if (!d) return NULL;
+    stkelm_t *e = (stkelm_t *)malloc(sizeof(stkelm_t));
+    if (!e) return NULL;
 
-    d->type = SE_UNKNOWN;
-    d->data = NULL;
+    e->type = SE_UNKNOWN;
+    e->data = NULL;
 
-    return d;
+    return e;
 }
 
-void stkelm_delete(stkelm_t *d)
+void stkelm_delete(stkelm_t *e)
 {
-    if (!d) return;
-    if (d->data) {
-        free(d->data);
+    if (!e) return;
+    if (e->data) {
+        free(e->data);
     }
-    free(d);
+    free(e);
 }
 
 stkelm_t *stkelm_duplicate(stkelm_t *src)
@@ -99,19 +99,19 @@ stkelm_t *stkelm_duplicate(stkelm_t *src)
     return dst;
 }
 
-char *stkelm_tostr(char *out, stkelm_t *d, size_t n)
+char *stkelm_tostr(char *out, stkelm_t *e, size_t n)
 {
-    if (!d) {
+    if (!e) {
         *out = '\0';
         return out;
     }
 
-    switch (d->type) {
+    switch (e->type) {
     case SE_INTEGER:
-        snprintf(out, n, "%d", *(int *)d->data);
+        snprintf(out, n, "%d", *(int *)e->data);
         break;
     case SE_STRING:
-        snprintf(out, n, "%s", (char *)d->data);
+        snprintf(out, n, "%s", (char *)e->data);
         break;
     default:
         *out = '\0';
@@ -121,13 +121,13 @@ char *stkelm_tostr(char *out, stkelm_t *d, size_t n)
     return out;
 }
 
-char *stkelm_get_type(stkelm_t *d)
+char *stkelm_get_type(stkelm_t *e)
 {
-    if (!d) return NULL;
+    if (!e) return NULL;
 
     char *t = "UNKNOWN";
 
-    switch (d->type) {
+    switch (e->type) {
     case SE_INTEGER:
         t = "INTEGER";
         break;
