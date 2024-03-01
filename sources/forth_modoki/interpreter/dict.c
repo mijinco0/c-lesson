@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "dict.h"
 
-#define TABLE_SIZE 16    /* must be a multiple of 2 */
+#define ARRAY_SIZE_DEF 16
 
 struct Node {
     char *key;
@@ -12,9 +12,13 @@ struct Node {
     struct Node *next;
 };
 
-static struct Node *dict_array[TABLE_SIZE];
+struct Dict {
+    int size;               /* must be a multiple of 2 */
+    struct Node **array;
+    int (*hash)(char *, int);
+};
 
-static int hash(char *str);
+static int hash_def(char *str, int size);
 static void delete_list(struct Node *p);
 static struct Node *update_or_insert_list(struct Node *p, char *key, stkelm_t *elem);
 static struct Node *search_list(struct Node *p, char *key);
@@ -25,43 +29,72 @@ static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
 
-void dict_new()
+dict_t *dict_new()
 {
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        dict_array[i] = NULL;
+    return dict_new_init(0, NULL);
+}
+
+dict_t *dict_new_init(int size, int (*hash)(char *, int))
+{
+    dict_t *d = (dict_t *)malloc(sizeof(dict_t));
+    if (!d) return NULL;
+
+    if (size <= 0) size = ARRAY_SIZE_DEF;
+
+    d->array = (struct Node **)malloc(sizeof(struct Node *) * size);
+    if (!d->array) {
+        free(d);
+        return NULL;
+    }
+
+    for (int i = 0; i < size; i++) {
+        d->array[i] = NULL;
+    }
+
+    d->size = size;
+    d->hash = hash ? hash : hash_def;
+
+    return d;
+}
+
+void dict_delete(dict_t *d)
+{
+    if (!d) return;
+
+    dict_clear(d);
+    if (d->array) free(d->array);
+    free(d);
+}
+
+void dict_clear(dict_t *d)
+{
+    if (!d) return;
+
+    for (int i = 0; i < d->size; i++) {
+        delete_list(d->array[i]);
+        d->array[i] = NULL;
     }
 }
 
-void dict_delete()
+void dict_put(dict_t *d, char *key, stkelm_t *elem)
 {
-    dict_clear();
-}
+    if (!d) return;
 
-void dict_clear()
-{
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        delete_list(dict_array[i]);
-        dict_array[i] = NULL;
-    }
-}
-
-void dict_put(char *key, stkelm_t *elem)
-{
-    int i = hash(key);
-    struct Node *head = dict_array[i];
+    int i = d->hash(key, d->size);
+    struct Node *head = d->array[i];
 
     if (head == NULL) {
         head = Node_new(key, elem);
-        dict_array[i] = head;
+        d->array[i] = head;
         return;
     }
 
     update_or_insert_list(head, key, elem);
 }
 
-int dict_get(char *key, stkelm_t *out_elem)
+int dict_get(dict_t *d, char *key, stkelm_t *out_elem)
 {
-    struct Node *p = search_list(dict_array[hash(key)], key);
+    struct Node *p = search_list(d->array[d->hash(key, d->size)], key);
     if (p) {
         out_elem = stkelm_duplicate(p->value);
         return 1;
@@ -70,21 +103,21 @@ int dict_get(char *key, stkelm_t *out_elem)
     return 0;
 }
 
-int dict_contains(char *key)
+int dict_contains(dict_t *d, char *key)
 {
-    int h = hash(key);
-    return search_list(dict_array[h], key) ? h : -1;
+    int h = d->hash(key, d->size);
+    return search_list(d->array[h], key) ? h : -1;
 }
 
-void dict_print_all()
+void dict_print_all(dict_t *d)
 {
     struct Node *p;
     char s[32];
     int i;
 
-    for (i = 0; i < TABLE_SIZE; i++) {
+    for (i = 0; i < d->size; i++) {
         printf("[%.2d]: ", i);
-        p = dict_array[i];
+        p = d->array[i];
         while (p) {
             printf("(%s, %s) ", p->key, stkelm_tostr(s, p->value, 32));
             p = p->next;
@@ -94,11 +127,12 @@ void dict_print_all()
     printf("\n");
 }
 
-static int hash(char *str)
+/* size must be a multiple of 2 */
+static int hash_def(char *str, int size)
 {
     unsigned int val = 0;
     while (*str) val += *str++;
-    return (int)(val & (TABLE_SIZE - 1));
+    return (int)(val & (size - 1));
 }
 
 /*
@@ -210,13 +244,13 @@ void test_dict_is_empty()
     int expect = 0;
     char *key = "hoge";
 
-    dict_new();
-    dict_print_all();
+    dict_t *dict = dict_new();
+    dict_print_all(dict);
 
     stkelm_t *e;
-    int actual = dict_get(key, e);
+    int actual = dict_get(dict, key, e);
 
-    dict_delete();
+    dict_delete(dict);
 
     assert(expect == actual);
 }
@@ -227,23 +261,23 @@ void test_dict_elem_one()
     int expect = 123;
     char *key = "hoge";
 
-    dict_new();
+    dict_t *dict = dict_new();
 
     stkelm_t *e;
 
     e = stkelm_new_integer(input);
-    dict_put(key, e);
+    dict_put(dict, key, e);
     stkelm_delete(e);
 
-    dict_print_all();
+    dict_print_all(dict);
 
     int actual = 0;
-    if (dict_get(key, e)) {
+    if (dict_get(dict, key, e)) {
         actual = *(int *)e->data;
         stkelm_delete(e);
     }
 
-    dict_delete();
+    dict_delete(dict);
 
     assert(expect == actual);
 }
@@ -254,30 +288,30 @@ void test_dict_elem_two()
     int expect[] = {123, 456};
     char *key[] = {"hoge", "fuga"};
 
-    dict_new();
+    dict_t *dict = dict_new();
 
     stkelm_t *e;
 
     e = stkelm_new_integer(input[0]);
-    dict_put(key[0], e);
+    dict_put(dict, key[0], e);
 
     e = stkelm_set_integer(e, input[1]);
-    dict_put(key[1], e);
+    dict_put(dict, key[1], e);
 
     stkelm_delete(e);
 
-    dict_print_all();
+    dict_print_all(dict);
 
     int actual[] = {0, 0};
 
     for (int i = 0; i < 2; i++) {
-        if (dict_get(key[i], e)) {
+        if (dict_get(dict, key[i], e)) {
             actual[i] = *(int *)e->data;
             stkelm_delete(e);
         }
     }
 
-    dict_delete();
+    dict_delete(dict);
 
     assert(expect[0] == actual[0]);
     assert(expect[1] == actual[1]);
@@ -290,20 +324,20 @@ void test_dict_not_found()
     char *key[] = {"hoge", "fuga", "piyo"};
     char *trykey = "foo";
 
-    dict_new();
+    dict_t *dict = dict_new();
 
     stkelm_t *e = stkelm_new_integer(0);
     for (int i = 0; i < 3; i++) {
         e = stkelm_set_integer(e, input[i]);
-        dict_put(key[i], e);
+        dict_put(dict, key[i], e);
     }
     stkelm_delete(e);
 
-    dict_print_all();
+    dict_print_all(dict);
 
-    int actual = dict_get(trykey, e);
+    int actual = dict_get(dict, trykey, e);
 
-    dict_delete();
+    dict_delete(dict);
 
     assert(expect == actual);
 }
@@ -316,39 +350,39 @@ void test_dict_same_hash()
     char *key[] = {"abcde", "abyz", "cdwx", "efuv"};    /* last three keys has same hash */
     int i;
 
-    dict_new();
-    dict_print_all();
+    dict_t *dict = dict_new();
+    dict_print_all(dict);
 
     stkelm_t *e = stkelm_new_integer(0);
     for (i = 0; i < 4; i++) {
         e = stkelm_set_integer(e, input[i]);
-        dict_put(key[i], e);
+        dict_put(dict, key[i], e);
     }
     stkelm_delete(e);
 
-    dict_print_all();
+    dict_print_all(dict);
 
     int actual[] = {0, 0, 0, 0};
 
     /* put elements in random order */
-    if (dict_get(key[2], e)) {
+    if (dict_get(dict, key[2], e)) {
         actual[2] = *(int *)e->data;
         stkelm_delete(e);
     }
-    if (dict_get(key[0], e)) {
+    if (dict_get(dict, key[0], e)) {
         actual[0] = *(int *)e->data;
         stkelm_delete(e);
     }
-    if (dict_get(key[3], e)) {
+    if (dict_get(dict, key[3], e)) {
         actual[3] = *(int *)e->data;
         stkelm_delete(e);
     }
-    if (dict_get(key[1], e)) {
+    if (dict_get(dict, key[1], e)) {
         actual[1] = *(int *)e->data;
         stkelm_delete(e);
     }
 
-    dict_delete();
+    dict_delete(dict);
 
     assert(expect[0] == actual[0]);
     assert(expect[1] == actual[1]);
@@ -363,38 +397,38 @@ void test_dict_overwrite()
     char *key[] = {"ab", "abyz", "cdwx", "efuv", "cdwx"};    /* value of "cdwx" should be overwritten */
     int i;
 
-    dict_new();
+    dict_t *dict = dict_new();
 
     stkelm_t *e = stkelm_new_integer(0);
     for (i = 0; i < 5; i++) {
         e = stkelm_set_integer(e, input[i]);
-        dict_put(key[i], e);
+        dict_put(dict, key[i], e);
     }
     stkelm_delete(e);
 
-    dict_print_all();
+    dict_print_all(dict);
 
     int actual[] = {0, 0, 0, 0};
 
     /* put elements in random order */
-    if (dict_get(key[2], e)) {
+    if (dict_get(dict, key[2], e)) {
         actual[2] = *(int *)e->data;
         stkelm_delete(e);
     }
-    if (dict_get(key[0], e)) {
+    if (dict_get(dict, key[0], e)) {
         actual[0] = *(int *)e->data;
         stkelm_delete(e);
     }
-    if (dict_get(key[3], e)) {
+    if (dict_get(dict, key[3], e)) {
         actual[3] = *(int *)e->data;
         stkelm_delete(e);
     }
-    if (dict_get(key[1], e)) {
+    if (dict_get(dict, key[1], e)) {
         actual[1] = *(int *)e->data;
         stkelm_delete(e);
     }
 
-    dict_delete();
+    dict_delete(dict);
 
     assert(expect[0] == actual[0]);
     assert(expect[1] == actual[1]);

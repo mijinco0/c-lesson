@@ -3,13 +3,17 @@
 
 #include "stkelm.h"
 
-void dict_new();
-void dict_delete();
-void dict_clear();
-void dict_put(char *key, stkelm_t *elem);
-int dict_get(char *key, stkelm_t *out_elem);
-int dict_contains(char *key);
-void dict_print_all();
+struct Dict;
+typedef struct Dict dict_t;
+
+dict_t *dict_new();
+dict_t *dict_new_init(int size, int (*hash)(char *, int));
+void dict_delete(dict_t *d);
+void dict_clear(dict_t *d);
+void dict_put(dict_t *d, char *key, stkelm_t *elem);
+int dict_get(dict_t *d, char *key, stkelm_t *out_elem);
+int dict_contains(dict_t *d, char *key);
+void dict_print_all(dict_t *d);
 
 /* for unit test */
 void test_dict_is_empty();

@@ -7,19 +7,21 @@
 #include "dict.h"
 
 static stack_t *sStack;
+static dict_t *sDict;
 
 static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
 
 void eval() {
-    if (!sStack) return;
+    if (!sStack || !sDict) return;
 
     int i, ch = EOF;
     stkelm_t *e1, *e2;
     struct Token *token = parser_token_new();
 
     stack_clear(sStack);
+    dict_clear(sDict);
 
     do {
         ch = parse_one(ch, token);
@@ -51,12 +53,12 @@ void eval() {
                     e1 = (stkelm_t *)stack_pop(sStack);
                     e2 = (stkelm_t *)stack_pop(sStack);
                     if (e1 && e2) {
-                        dict_put((char *)e2->data, e1);
+                        dict_put(sDict, (char *)e2->data, e1);
                         stkelm_delete(e1);
                         stkelm_delete(e2);
                     }
-                } else if (dict_contains(name) >= 0) {
-                    if (dict_get(name, e1)) {
+                } else if (dict_contains(sDict, name) >= 0) {
+                    if (dict_get(sDict, name, e1)) {
                         stack_push(sStack, e1);
                         stkelm_delete(e1);
                     }
@@ -90,7 +92,6 @@ static void test_eval_num_one() {
     }
 
     assert(expect == actual);
-
 }
 
 static void test_eval_num_two() {
@@ -205,6 +206,7 @@ int main() {
     test_dict_overwrite();
 
     sStack = stack_new(STACK_SIZE);
+    sDict = dict_new();
 
     test_eval_num_one();
     test_eval_num_two();
@@ -227,6 +229,7 @@ int main() {
 #endif
 
     stack_delete(sStack);
+    dict_delete(sDict);
 
     return 0;
 }
