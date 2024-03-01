@@ -228,6 +228,7 @@ int main() {
     printf("result: %d\n", *(int *)e->data);
 #endif
 
+    stkelm_delete(e);
     stack_delete(sStack);
     dict_delete(sDict);
 
