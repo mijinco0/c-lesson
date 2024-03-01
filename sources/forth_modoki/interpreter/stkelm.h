@@ -23,5 +23,6 @@ void stkelm_delete(stkelm_t *d);
 stkelm_t *stkelm_duplicate(stkelm_t *src);
 char *stkelm_tostr(char *out, stkelm_t *d, size_t n);
 char *stkelm_get_type(stkelm_t *d);
+void stkelm_print(stkelm_t *e, char *prefix, char *suffix);
 
 #endif
