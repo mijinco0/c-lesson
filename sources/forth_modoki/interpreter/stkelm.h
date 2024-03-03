@@ -20,7 +20,7 @@ stkelm_t *stkelm_new_string(char *e);
 stkelm_t *stkelm_set_string(stkelm_t *e, char *s);
 stkelm_t *stkelm_new(void);
 void stkelm_free(stkelm_t *e);
-stkelm_t *stkelm_duplicate(stkelm_t *src);
+stkelm_t *stkelm_duplicate(stkelm_t *src, stkelm_t *dst);
 char *stkelm_tostr(char *out, stkelm_t *e, size_t n);
 char *stkelm_get_type(stkelm_t *e);
 void stkelm_print(stkelm_t *e, char *prefix, char *suffix);

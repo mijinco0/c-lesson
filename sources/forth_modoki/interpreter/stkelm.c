@@ -79,21 +79,30 @@ void stkelm_free(stkelm_t *e)
     free(e);
 }
 
-stkelm_t *stkelm_duplicate(stkelm_t *src)
+stkelm_t *stkelm_duplicate(stkelm_t *src, stkelm_t *dst)
 {
-    if (!src) return NULL;
+    if (!src || !src->data) return NULL;
 
-    stkelm_t *dst = NULL;
+    stkelm_t *new;
 
     switch (src->type) {
     case SE_INTEGER:
-        dst = stkelm_new_integer(*(int *)src->data);
+        new = stkelm_new_integer(*(int *)src->data);
         break;
     case SE_STRING:
-        dst = stkelm_new_string((char *)src->data);
+        new = stkelm_new_string((char *)src->data);
         break;
     default:
-        break;
+        return NULL;
+    }
+
+    if (dst) {
+        dst->type = src->type;
+        if (dst->data) free(dst->data);
+        dst->data = new->data;
+        free(new);
+    } else {
+        dst = new;
     }
 
     return dst;

@@ -96,7 +96,7 @@ int dict_get(dict_t *d, char *key, stkelm_t *out_elem)
 {
     struct Node *p = search_list(d->array[d->hash(key, d->size)], key);
     if (p) {
-        out_elem = stkelm_duplicate(p->value);
+        out_elem = stkelm_duplicate(p->value, NULL);
         return 1;
     }
 
@@ -164,7 +164,7 @@ static struct Node *update_or_insert_list(struct Node *p, char *key, stkelm_t *e
     while (1) {
         if (streq(p->key, key)) {
             stkelm_delete(p->value);
-            p->value = stkelm_duplicate(elem);
+            p->value = stkelm_duplicate(elem, NULL);
             return p;
         }
         if (p->next == NULL) break;
@@ -203,7 +203,7 @@ static struct Node *Node_new(char *key, stkelm_t *elem)
     }
     strncpy(node->key, key, strlen(key) + 1);
 
-    node->value = stkelm_duplicate(elem);
+    node->value = stkelm_duplicate(elem, NULL);
     if (!node->value) {
         free(node->key);
         free(node);
