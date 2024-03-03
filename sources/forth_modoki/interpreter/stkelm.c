@@ -147,6 +147,9 @@ void stkelm_print(stkelm_t *e, char *prefix, char *suffix)
     stkelm_tostr(data, e, 256);
 
     if (prefix) printf("%s", prefix);
-    printf("e = 0x%lx, e->data = 0x%lx *(e->data) = %s", (unsigned long)e, (unsigned long)e->data, data);
+    printf("e = 0x%lx", (unsigned long)e);
+    if (e) {
+        printf(", e->data = 0x%lx *(e->data) = %s", (unsigned long)e->data, data);
+    }
     if (suffix) printf("%s", suffix);
 }
