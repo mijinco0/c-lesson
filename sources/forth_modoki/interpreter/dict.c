@@ -57,7 +57,7 @@ dict_t *dict_new_init(int size, int (*hash)(char *, int))
     return d;
 }
 
-void dict_delete(dict_t *d)
+void dict_free(dict_t *d)
 {
     if (!d) return;
 
