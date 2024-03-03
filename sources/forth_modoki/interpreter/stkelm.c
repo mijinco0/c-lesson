@@ -120,6 +120,7 @@ stkelm_t *stkelm_duplicate(stkelm_t *src, stkelm_t *dst)
         break;
     case SE_C_FUNC:
         new = stkelm_new_cfunc((void (*)())src->data);
+        break;
     default:
         return NULL;
     }
