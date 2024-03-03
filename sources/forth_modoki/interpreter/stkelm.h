@@ -6,6 +6,7 @@
 typedef enum StkelmType {
     SE_INTEGER,
     SE_STRING,
+    SE_C_FUNC,
     SE_UNKNOWN,
 } stkelm_type_t;
 
@@ -18,6 +19,8 @@ stkelm_t *stkelm_new_integer(int i);
 stkelm_t *stkelm_set_integer(stkelm_t *e, int i);
 stkelm_t *stkelm_new_string(char *e);
 stkelm_t *stkelm_set_string(stkelm_t *e, char *s);
+stkelm_t *stkelm_new_cfunc(void (*func)());
+stkelm_t *stkelm_set_cfunc(stkelm_t *e, void (*func)());
 stkelm_t *stkelm_new(void);
 void stkelm_free(stkelm_t *e);
 stkelm_t *stkelm_duplicate(stkelm_t *src, stkelm_t *dst);

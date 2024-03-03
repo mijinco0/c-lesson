@@ -59,6 +59,24 @@ stkelm_t *stkelm_set_string(stkelm_t *e, char *s)
     return e;
 }
 
+stkelm_t *stkelm_new_cfunc(void (*func)())
+{
+    stkelm_t *e = stkelm_new();
+    if (!e) return NULL;
+
+    return stkelm_set_cfunc(e, func);
+}
+
+stkelm_t *stkelm_set_cfunc(stkelm_t *e, void (*func)())
+{
+    if (!e) return NULL;
+
+    e->type = SE_C_FUNC;
+    e->data = (void *)func;
+
+    return e;
+}
+
 stkelm_t *stkelm_new(void)
 {
     stkelm_t *e = (stkelm_t *)malloc(sizeof(stkelm_t));
@@ -74,7 +92,15 @@ void stkelm_free(stkelm_t *e)
 {
     if (!e) return;
     if (e->data) {
-        free(e->data);
+        switch (e->type) {
+        case SE_C_FUNC:
+        case SE_UNKNOWN:
+            /* do nothing */
+            break;
+        default:
+            free(e->data);
+            break;
+        }
     }
     free(e);
 }
@@ -92,6 +118,8 @@ stkelm_t *stkelm_duplicate(stkelm_t *src, stkelm_t *dst)
     case SE_STRING:
         new = stkelm_new_string((char *)src->data);
         break;
+    case SE_C_FUNC:
+        new = stkelm_new_cfunc((void (*)())src->data);
     default:
         return NULL;
     }
@@ -121,6 +149,9 @@ char *stkelm_tostr(char *out, stkelm_t *e, size_t n)
         break;
     case SE_STRING:
         snprintf(out, n, "%s", (char *)e->data);
+        break;
+    case SE_C_FUNC:
+        snprintf(out, n, "0x%lx", (unsigned long)e->data);
         break;
     default:
         *out = '\0';
