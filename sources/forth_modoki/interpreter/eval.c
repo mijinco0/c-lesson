@@ -11,6 +11,7 @@ static dict_t *sDict;
 
 static void register_primitives();
 static void add_op();
+static void def_op();
 
 static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
@@ -41,15 +42,7 @@ void eval() {
                 break;
             case EXECUTABLE_NAME:
                 name = token->u.name;
-                if (streq(name, "def")) {
-                    e1 = (stkelm_t *)stack_pop(sStack);
-                    e2 = (stkelm_t *)stack_pop(sStack);
-                    if (e1 && e2) {
-                        dict_put(sDict, (char *)e2->data, e1);
-                        stkelm_delete(e1);
-                        stkelm_delete(e2);
-                    }
-                } else if (dict_contains(sDict, name) >= 0) {
+                if (dict_contains(sDict, name) >= 0) {
                     e1 = stkelm_new();
                     if (dict_get(sDict, name, e1)) {
                         switch (e1->type) {
@@ -67,8 +60,6 @@ void eval() {
                             break;
                         }
                     }
-                } else {
-                    /* do nothing */
                 }
                 break;
             default:
@@ -84,6 +75,7 @@ static void register_primitives()
     stkelm_t *e;
 
     e = stkelm_new_cfunc(add_op); dict_put(sDict, "add", e);
+    e = stkelm_set_cfunc(e, def_op); dict_put(sDict, "def", e);
 
     stkelm_delete(e);
 }
@@ -102,6 +94,20 @@ static void add_op()
         stkelm_delete(e2);
         e1 = stkelm_new_integer(i);
         stack_push(sStack, e1);
+    }
+}
+
+static void def_op()
+{
+    stkelm_t *e1, *e2;
+
+    e1 = (stkelm_t *)stack_pop(sStack);
+    e2 = (stkelm_t *)stack_pop(sStack);
+
+    if (e1 && e2) {
+        dict_put(sDict, (char *)e2->data, e1);
+        stkelm_delete(e1);
+        stkelm_delete(e2);
     }
 }
 
