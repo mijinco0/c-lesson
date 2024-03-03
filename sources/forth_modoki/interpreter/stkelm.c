@@ -70,7 +70,7 @@ stkelm_t *stkelm_new(void)
     return e;
 }
 
-void stkelm_delete(stkelm_t *e)
+void stkelm_free(stkelm_t *e)
 {
     if (!e) return;
     if (e->data) {
