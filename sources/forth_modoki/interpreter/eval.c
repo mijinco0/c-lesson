@@ -9,6 +9,9 @@
 static stack_t *sStack;
 static dict_t *sDict;
 
+static void register_primitives();
+static void add_op();
+
 static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
@@ -16,12 +19,11 @@ static int streq(char *s1, char *s2) {
 void eval() {
     if (!sStack || !sDict) return;
 
-    int i, ch = EOF;
+    int ch = EOF;
     stkelm_t *e1, *e2;
     struct Token *token = parser_token_new();
 
     stack_clear(sStack);
-    dict_clear(sDict);
 
     do {
         ch = parse_one(ch, token);
@@ -39,17 +41,7 @@ void eval() {
                 break;
             case EXECUTABLE_NAME:
                 name = token->u.name;
-                if (streq(name, "add")) {
-                    e1 = (stkelm_t *)stack_pop(sStack);
-                    e2 = (stkelm_t *)stack_pop(sStack);
-                    if (e1 && e2) {
-                        i = *(int *)e1->data + *(int *)e2->data;
-                        stkelm_delete(e1);
-                        stkelm_delete(e2);
-                        e1 = stkelm_new_integer(i);
-                        stack_push(sStack, e1);
-                    }
-                } else if (streq(name, "def")) {
+                if (streq(name, "def")) {
                     e1 = (stkelm_t *)stack_pop(sStack);
                     e2 = (stkelm_t *)stack_pop(sStack);
                     if (e1 && e2) {
@@ -60,7 +52,20 @@ void eval() {
                 } else if (dict_contains(sDict, name) >= 0) {
                     e1 = stkelm_new();
                     if (dict_get(sDict, name, e1)) {
-                        stack_push(sStack, e1);
+                        switch (e1->type) {
+                        case SE_C_FUNC:
+                            /* primitive */
+                            {
+                                void (*func)() = (void (*)())e1->data;
+                                stkelm_delete(e1);
+                                func();
+                            }
+                            break;
+                        default:
+                            /* user defined name */
+                            stack_push(sStack, e1);
+                            break;
+                        }
                     }
                 } else {
                     /* do nothing */
@@ -72,6 +77,32 @@ void eval() {
     } while (ch != EOF);
 
     parser_token_delete(token);
+}
+
+static void register_primitives()
+{
+    stkelm_t *e;
+
+    e = stkelm_new_cfunc(add_op); dict_put(sDict, "add", e);
+
+    stkelm_delete(e);
+}
+
+static void add_op()
+{
+    stkelm_t *e1, *e2;
+    int i;
+
+    e1 = (stkelm_t *)stack_pop(sStack);
+    e2 = (stkelm_t *)stack_pop(sStack);
+
+    if (e1 && e2) {
+        i = *(int *)e1->data + *(int *)e2->data;
+        stkelm_delete(e1);
+        stkelm_delete(e2);
+        e1 = stkelm_new_integer(i);
+        stack_push(sStack, e1);
+    }
 }
 
 static void test_eval_num_one() {
@@ -198,6 +229,7 @@ static void test_eval_literal_two() {
 }
 
 int main() {
+#if 1    /* unit test */
     test_dict_is_empty();
     test_dict_elem_one();
     test_dict_elem_two();
@@ -207,6 +239,7 @@ int main() {
 
     sStack = stack_new(STACK_SIZE);
     sDict = dict_new();
+    register_primitives();
 
     test_eval_num_one();
     test_eval_num_two();
@@ -214,8 +247,16 @@ int main() {
     test_eval_literal_one();
     test_eval_literal_two();
 
+    stack_delete(sStack);
+    dict_delete(sDict);
+#endif
+
     stkelm_t *e;
     char *input;
+
+    sStack = stack_new(STACK_SIZE);
+    sDict = dict_new();
+    register_primitives();
 
     input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
     printf("%s => ", input);
