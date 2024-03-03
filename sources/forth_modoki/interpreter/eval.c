@@ -11,10 +11,16 @@ static dict_t *sDict;
 
 static void register_primitives();
 static void add_op();
+static void sub_op();
+static void mul_op();
+static void div_op();
 static void def_op();
 
 static void int_op(int (*op)(int, int));
 static int iadd(int a, int b) { return a + b; }
+static int isub(int a, int b) { return a - b; }
+static int imul(int a, int b) { return a * b; }
+static int idiv(int a, int b) { return a / b; }
 
 static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
@@ -78,6 +84,9 @@ static void register_primitives()
     stkelm_t *e;
 
     e = stkelm_new_cfunc(add_op); dict_put(sDict, "add", e);
+    e = stkelm_set_cfunc(e, sub_op); dict_put(sDict, "sub", e);
+    e = stkelm_set_cfunc(e, mul_op); dict_put(sDict, "mul", e);
+    e = stkelm_set_cfunc(e, div_op); dict_put(sDict, "div", e);
     e = stkelm_set_cfunc(e, def_op); dict_put(sDict, "def", e);
 
     stkelm_delete(e);
@@ -92,7 +101,7 @@ static void int_op(int (*op)(int, int))
     e2 = (stkelm_t *)stack_pop(sStack);
 
     if (e1 && e2) {
-        i = op(*(int *)e1->data, *(int *)e2->data);
+        i = op(*(int *)e2->data, *(int *)e1->data);
         stkelm_delete(e1);
         stkelm_delete(e2);
         e1 = stkelm_new_integer(i);
@@ -103,6 +112,21 @@ static void int_op(int (*op)(int, int))
 static void add_op()
 {
     int_op(iadd);
+}
+
+static void sub_op()
+{
+    int_op(isub);
+}
+
+static void mul_op()
+{
+    int_op(imul);
+}
+
+static void div_op()
+{
+    int_op(idiv);
 }
 
 static void def_op()
@@ -191,6 +215,63 @@ static void test_eval_num_add() {
     assert(expect == actual);
 }
 
+static void test_eval_num_sub() {
+    char *input = "5 3 sub";
+    int expect = 2;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = 0;
+
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual = *(int *)e->data;
+        stkelm_delete(e);
+    }
+
+    assert(expect == actual);
+}
+
+static void test_eval_num_mul() {
+    char *input = "9 8 mul";
+    int expect = 72;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = 0;
+
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual = *(int *)e->data;
+        stkelm_delete(e);
+    }
+
+    assert(expect == actual);
+}
+
+static void test_eval_num_div() {
+    char *input = "22 3 div";
+    int expect = 7;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = 0;
+
+    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
+    if (e) {
+        actual = *(int *)e->data;
+        stkelm_delete(e);
+    }
+
+    assert(expect == actual);
+}
+
 static void test_eval_literal_one() {
     char *input = "/hoge";
     char *expect = "hoge";
@@ -258,6 +339,9 @@ int main() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
+    test_eval_num_sub();
+    test_eval_num_mul();
+    test_eval_num_div();
     test_eval_literal_one();
     test_eval_literal_two();
 
