@@ -94,9 +94,11 @@ void dict_put(dict_t *d, char *key, stkelm_t *elem)
 
 int dict_get(dict_t *d, char *key, stkelm_t *out_elem)
 {
+    if (!out_elem) return 0;
+
     struct Node *p = search_list(d->array[d->hash(key, d->size)], key);
     if (p) {
-        out_elem = stkelm_duplicate(p->value, NULL);
+        stkelm_duplicate(p->value, out_elem);
         return 1;
     }
 
@@ -267,7 +269,6 @@ void test_dict_elem_one()
 
     e = stkelm_new_integer(input);
     dict_put(dict, key, e);
-    stkelm_delete(e);
 
     dict_print_all(dict);
 
@@ -277,6 +278,7 @@ void test_dict_elem_one()
         stkelm_delete(e);
     }
 
+    stkelm_delete(e);
     dict_delete(dict);
 
     assert(expect == actual);
@@ -298,8 +300,6 @@ void test_dict_elem_two()
     e = stkelm_set_integer(e, input[1]);
     dict_put(dict, key[1], e);
 
-    stkelm_delete(e);
-
     dict_print_all(dict);
 
     int actual[] = {0, 0};
@@ -307,10 +307,10 @@ void test_dict_elem_two()
     for (int i = 0; i < 2; i++) {
         if (dict_get(dict, key[i], e)) {
             actual[i] = *(int *)e->data;
-            stkelm_delete(e);
         }
     }
 
+    stkelm_delete(e);
     dict_delete(dict);
 
     assert(expect[0] == actual[0]);
@@ -331,12 +331,12 @@ void test_dict_not_found()
         e = stkelm_set_integer(e, input[i]);
         dict_put(dict, key[i], e);
     }
-    stkelm_delete(e);
 
     dict_print_all(dict);
 
     int actual = dict_get(dict, trykey, e);
 
+    stkelm_delete(e);
     dict_delete(dict);
 
     assert(expect == actual);
@@ -358,7 +358,6 @@ void test_dict_same_hash()
         e = stkelm_set_integer(e, input[i]);
         dict_put(dict, key[i], e);
     }
-    stkelm_delete(e);
 
     dict_print_all(dict);
 
@@ -367,21 +366,18 @@ void test_dict_same_hash()
     /* put elements in random order */
     if (dict_get(dict, key[2], e)) {
         actual[2] = *(int *)e->data;
-        stkelm_delete(e);
     }
     if (dict_get(dict, key[0], e)) {
         actual[0] = *(int *)e->data;
-        stkelm_delete(e);
     }
     if (dict_get(dict, key[3], e)) {
         actual[3] = *(int *)e->data;
-        stkelm_delete(e);
     }
     if (dict_get(dict, key[1], e)) {
         actual[1] = *(int *)e->data;
-        stkelm_delete(e);
     }
 
+    stkelm_delete(e);
     dict_delete(dict);
 
     assert(expect[0] == actual[0]);
@@ -404,7 +400,6 @@ void test_dict_overwrite()
         e = stkelm_set_integer(e, input[i]);
         dict_put(dict, key[i], e);
     }
-    stkelm_delete(e);
 
     dict_print_all(dict);
 
@@ -413,21 +408,18 @@ void test_dict_overwrite()
     /* put elements in random order */
     if (dict_get(dict, key[2], e)) {
         actual[2] = *(int *)e->data;
-        stkelm_delete(e);
     }
     if (dict_get(dict, key[0], e)) {
         actual[0] = *(int *)e->data;
-        stkelm_delete(e);
     }
     if (dict_get(dict, key[3], e)) {
         actual[3] = *(int *)e->data;
-        stkelm_delete(e);
     }
     if (dict_get(dict, key[1], e)) {
         actual[1] = *(int *)e->data;
-        stkelm_delete(e);
     }
 
+    stkelm_delete(e);
     dict_delete(dict);
 
     assert(expect[0] == actual[0]);

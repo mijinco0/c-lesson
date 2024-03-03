@@ -58,9 +58,9 @@ void eval() {
                         stkelm_delete(e2);
                     }
                 } else if (dict_contains(sDict, name) >= 0) {
+                    e1 = stkelm_new();
                     if (dict_get(sDict, name, e1)) {
                         stack_push(sStack, e1);
-                        stkelm_delete(e1);
                     }
                 } else {
                     /* do nothing */
@@ -214,19 +214,22 @@ int main() {
     test_eval_literal_one();
     test_eval_literal_two();
 
-#if 0
-    char *input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
+    stkelm_t *e;
+    char *input;
+
+    input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
+    printf("%s => ", input);
     cl_getc_set_src(input);
     eval();
-    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
-    printf("result: %d\n", *(int *)e->data);
-#elif 1
-    char *input = "/abc 12 def abc abc add";    /* =24 */
+    e = (stkelm_t *)stack_pop(sStack);
+    printf("%d\n", *(int *)e->data);
+
+    input = "/abc 12 def abc abc add";    /* =24 */
+    printf("%s => ", input);
     cl_getc_set_src(input);
     eval();
-    stkelm_t *e = (stkelm_t *)stack_pop(sStack);
-    printf("result: %d\n", *(int *)e->data);
-#endif
+    e = (stkelm_t *)stack_pop(sStack);
+    printf("%d\n", *(int *)e->data);
 
     stkelm_delete(e);
     stack_delete(sStack);
