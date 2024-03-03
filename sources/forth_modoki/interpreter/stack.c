@@ -27,7 +27,7 @@ stack_t *stack_new(size_t size)
     return stack;
 }
 
-void stack_delete(stack_t *stack)
+void stack_free(stack_t *stack)
 {
     if (!stack) return;
 
