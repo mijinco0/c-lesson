@@ -13,6 +13,9 @@ static void register_primitives();
 static void add_op();
 static void def_op();
 
+static void int_op(int (*op)(int, int));
+static int iadd(int a, int b) { return a + b; }
+
 static int streq(char *s1, char *s2) {
     return !strcmp(s1, s2);
 }
@@ -80,7 +83,7 @@ static void register_primitives()
     stkelm_delete(e);
 }
 
-static void add_op()
+static void int_op(int (*op)(int, int))
 {
     stkelm_t *e1, *e2;
     int i;
@@ -89,12 +92,17 @@ static void add_op()
     e2 = (stkelm_t *)stack_pop(sStack);
 
     if (e1 && e2) {
-        i = *(int *)e1->data + *(int *)e2->data;
+        i = op(*(int *)e1->data, *(int *)e2->data);
         stkelm_delete(e1);
         stkelm_delete(e2);
         e1 = stkelm_new_integer(i);
         stack_push(sStack, e1);
     }
+}
+
+static void add_op()
+{
+    int_op(iadd);
 }
 
 static void def_op()
