@@ -357,18 +357,16 @@ int main() {
     register_primitives();
 
     input = "1 2 3 add add 4 5 6 7 8 9 add add add add add add";    /* =45 */
-    printf("%s => ", input);
     cl_getc_set_src(input);
     eval();
     e = (stkelm_t *)stack_pop(sStack);
-    printf("%d\n", *(int *)e->data);
+    printf("%s => %d\n", input, *(int *)e->data);
 
     input = "/abc 12 def abc abc add";    /* =24 */
-    printf("%s => ", input);
     cl_getc_set_src(input);
     eval();
     e = (stkelm_t *)stack_pop(sStack);
-    printf("%d\n", *(int *)e->data);
+    printf("%s => %d\n", input, *(int *)e->data);
 
     stkelm_delete(e);
     stack_delete(sStack);
